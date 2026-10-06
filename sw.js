@@ -1,8 +1,9 @@
 "use strict";
 
-const APP_CACHE = "labarkouh-quran-app-v1";
+const APP_CACHE = "labarkouh-quran-app-v2";
+const AUDIO_CACHE = "labarkouh-quran-audio-v2";
 
-const APP_ASSETS = [
+const APP_FILES = [
   "./",
   "./index.html",
   "./manifest.json",
@@ -11,7 +12,7 @@ const APP_ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(APP_CACHE).then((cache) => cache.addAll(APP_ASSETS))
+    caches.open(APP_CACHE).then((cache) => cache.addAll(APP_FILES))
   );
 
   self.skipWaiting();
@@ -19,8 +20,18 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    self.clients.claim()
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys
+          .filter((key) => {
+            return key !== APP_CACHE && key !== AUDIO_CACHE;
+          })
+          .map((key) => caches.delete(key))
+      );
+    })
   );
+
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
@@ -33,18 +44,14 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   /*
-    ملفات MP3 يتم التعامل معها من الصفحة نفسها عند الضغط على حفظ:
-    caches.open("labarkouh-quran-audio-v1").put(...)
-    لذلك هنا نُرجع نسخة الكاش أولًا إن كانت محفوظة.
+    عند تشغيل ملف MP3:
+    1. البحث عنه أولًا في ذاكرة التلاوات المحفوظة.
+    2. إن لم يكن محفوظًا، يتم طلبه من الإنترنت.
   */
   if (url.hostname.includes("mp3quran.net") && url.pathname.endsWith(".mp3")) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) {
-          return cached;
-        }
-
-        return fetch(request);
+      caches.match(request).then((cachedResponse) => {
+        return cachedResponse || fetch(request);
       })
     );
 
@@ -52,29 +59,30 @@ self.addEventListener("fetch", (event) => {
   }
 
   /*
-    التطبيق: كاش أولًا، ثم الإنترنت إذا لم تكن الملفات موجودة.
+    ملفات التطبيق نفسها:
+    نعيدها من الكاش أولًا، ثم نستخدم الإنترنت عندما لا تكون متاحة.
   */
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) {
-        return cached;
+    caches.match(request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
       }
 
       return fetch(request)
-        .then((response) => {
+        .then((networkResponse) => {
           if (
-            response &&
-            response.status === 200 &&
-            response.type === "basic"
+            networkResponse &&
+            networkResponse.status === 200 &&
+            networkResponse.type === "basic"
           ) {
-            const responseCopy = response.clone();
+            const copy = networkResponse.clone();
 
             caches.open(APP_CACHE).then((cache) => {
-              cache.put(request, responseCopy);
+              cache.put(request, copy);
             });
           }
 
-          return response;
+          return networkResponse;
         })
         .catch(() => {
           if (request.mode === "navigate") {
