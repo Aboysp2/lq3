@@ -1,271 +1,918 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1a5e3a">
-<meta name="description" content="تطبيق لا باركوه للاستماع وحفظ تلاوات القرآن الكريم للعمل بدون إنترنت">
-<link rel="manifest" href="manifest.json">
-<title>لا باركوه للقرآن الكريم</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#115c3b">
+  <meta name="description" content="لا باركوه للقرآن الكريم - استماع وحفظ التلاوات للعمل بدون إنترنت">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>لا باركوه للقرآن الكريم</title>
 
-<style>
-:root{--primary:#1a5e3a;--primary-dark:#0d3d22;--secondary:#d4af37;--bg:#f5f0e1;--text:#222;--card:#fff;--radius:14px;--shadow:0 4px 14px rgba(0,0,0,.12)}
-body.dark{--bg:#121826;--text:#eee;--card:#1b2437;--shadow:0 4px 14px rgba(0,0,0,.5)}
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,"Segoe UI",Tahoma,sans-serif}
-body{background:var(--bg);color:var(--text);padding-bottom:150px;transition:.3s}
-header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;text-align:center;padding:22px 14px;border-bottom:4px solid var(--secondary)}
-header h1{font-size:1.6em}
-header p{color:var(--secondary);margin-top:5px}
-nav{position:sticky;top:0;z-index:50;display:flex;justify-content:center;gap:7px;padding:10px;background:var(--card);box-shadow:var(--shadow);flex-wrap:wrap}
-.nav-btn{border:1.5px solid var(--primary);background:transparent;color:var(--primary);padding:7px 13px;border-radius:20px;font-weight:700;cursor:pointer}
-.nav-btn.active{background:var(--primary);color:#fff}
-main{max-width:900px;margin:18px auto;padding:0 14px}
-section{display:none}
-section.active{display:block}
-h2.title{color:var(--primary);border-bottom:2px solid var(--secondary);padding-bottom:6px;margin-bottom:14px}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
-input[type=text],select{width:100%;padding:11px;border:1px solid #bbb;border-radius:12px;background:var(--card);color:var(--text);margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;text-align:center;cursor:pointer;border:2px solid transparent}
-.item:hover,.item.selected{border-color:var(--secondary)}
-.list{display:flex;flex-direction:column;gap:8px}
-.row{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-button.save{background:var(--primary);color:#fff;border:0;padding:8px 13px;border-radius:18px;font-weight:700;cursor:pointer}
-button.save.saved{background:#27ae60}
-button.save.loading{background:#e67e22}
-.player{position:fixed;bottom:0;left:0;right:0;background:var(--card);padding:12px;box-shadow:0 -4px 16px rgba(0,0,0,.25);border-top:3px solid var(--secondary);z-index:100;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.player .info{flex:1;min-width:140px}
-.player .info b{color:var(--primary);display:block}
-.player .info span{font-size:.8em;opacity:.7}
-.controls{display:flex;gap:6px}
-.controls button{width:40px;height:40px;border:0;border-radius:50%;background:var(--primary);color:#fff;font-size:1em;cursor:pointer}
-#playBtn{width:48px;height:48px;background:var(--secondary);color:var(--primary-dark);font-size:1.2em}
-.progress{flex:2;min-width:170px;display:flex;align-items:center;gap:8px;font-size:.78em}
-input[type=range]{flex:1;accent-color:var(--primary)}
-.toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);background:var(--primary-dark);color:#fff;padding:10px 18px;border-radius:25px;opacity:0;pointer-events:none;transition:.3s;z-index:999}
-.toast.show{opacity:1}
-footer{background:var(--primary-dark);color:#fff;text-align:center;padding:16px;font-weight:800}
-@media(max-width:600px){.progress{order:3;min-width:100%}}
-</style>
+  <style>
+    :root {
+      --primary: #115c3b;
+      --primary-dark: #0a3824;
+      --gold: #d7af32;
+      --gold-soft: #f7edc9;
+      --bg: #f8f3e5;
+      --card: #ffffff;
+      --text: #20251f;
+      --muted: #657168;
+      --border: #e9dfbd;
+      --danger: #bd3535;
+      --success: #238852;
+      --shadow: 0 5px 18px rgba(20, 52, 36, .12);
+      --radius: 16px;
+    }
+
+    body.dark-mode {
+      --bg: #121a18;
+      --card: #1c2924;
+      --text: #f4f7f4;
+      --muted: #b7c4bc;
+      --border: #394a42;
+      --gold-soft: #302b19;
+      --shadow: 0 5px 18px rgba(0, 0, 0, .35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(215,175,50,.10), transparent 32%),
+        var(--bg);
+      color: var(--text);
+      padding-bottom: 150px;
+      transition: background .25s ease, color .25s ease;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .main-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-bottom: 4px solid var(--gold);
+      color: #fff;
+      text-align: center;
+      padding: 20px 14px;
+    }
+
+    .brand-box {
+      max-width: 880px;
+      margin: 0 auto;
+      border: 1px solid rgba(215,175,50,.85);
+      border-radius: 14px;
+      padding: 13px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .brand-box h1 {
+      font-size: clamp(1.25rem, 4vw, 1.8rem);
+      margin-bottom: 5px;
+    }
+
+    .brand-box p {
+      color: #f5d978;
+      font-size: .92rem;
+    }
+
+    .main-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      background: color-mix(in srgb, var(--card) 94%, transparent);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 3px 12px rgba(0,0,0,.10);
+    }
+
+    .nav-btn {
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: .88rem;
+      font-weight: 800;
+      transition: .2s ease;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: var(--primary);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .content {
+      width: min(100%, 960px);
+      padding: 0 14px;
+      margin: 20px auto;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .section-title {
+      color: var(--primary);
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 7px;
+      margin-bottom: 14px;
+      font-size: 1.2rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .welcome-card {
+      border-top: 4px solid var(--primary);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .welcome-card p {
+      margin-top: 7px;
+      color: var(--muted);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .stat:hover {
+      border-color: var(--gold);
+    }
+
+    .stat h3 {
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    .stat p {
+      color: var(--primary);
+      font-weight: 900;
+      font-size: 1.5rem;
+      margin-top: 5px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      outline: none;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(17,92,59,.13);
+    }
+
+    .sheikhs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 12px;
+    }
+
+    .sheikh-card {
+      background: var(--card);
+      min-height: 155px;
+      padding: 14px 10px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 2px solid transparent;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .sheikh-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--gold);
+    }
+
+    .sheikh-card.selected {
+      border-color: var(--gold);
+      background: linear-gradient(135deg, rgba(215,175,50,.18), var(--card));
+    }
+
+    .sheikh-label {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-size: .74rem;
+      font-weight: 800;
+      padding: 5px 15px;
+      border-radius: 999px;
+    }
+
+    .sheikh-name {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.5;
+      font-size: .98rem;
+    }
+
+    .country-tag {
+      display: inline-block;
+      white-space: nowrap;
+      background: rgba(17,92,59,.10);
+      color: var(--primary);
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 750;
+    }
+
+    .surahs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .surah-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: var(--card);
+      padding: 12px 13px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .surah-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 160px;
+      cursor: pointer;
+    }
+
+    .surah-number {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 900;
+      font-size: .84rem;
+    }
+
+    .surah-main small {
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 800;
+      font-size: .82rem;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+
+    .btn:active {
+      transform: scale(.95);
+    }
+
+    .btn-play {
+      background: var(--gold);
+      color: var(--primary-dark);
+    }
+
+    .btn-save {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-save.saved {
+      background: var(--success);
+    }
+
+    .btn-save.loading {
+      background: #e18420;
+      opacity: .9;
+    }
+
+    .btn-delete {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+
+    .settings-row:last-child {
+      border-bottom: 0;
+    }
+
+    .switch {
+      position: relative;
+      width: 46px;
+      height: 25px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #a8aaa9;
+      transition: .25s;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      right: 4px;
+      top: 3.5px;
+      border-radius: 50%;
+      background: #fff;
+      transition: .25s;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--primary);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(-20px);
+    }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .player-bar {
+      position: fixed;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      background: var(--card);
+      border-top: 3px solid var(--gold);
+      box-shadow: 0 -5px 19px rgba(0,0,0,.21);
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .player-info {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    #currentSurah {
+      display: block;
+      color: var(--primary);
+      font-weight: 900;
+      font-size: .94rem;
+    }
+
+    #currentSheikh {
+      display: block;
+      color: var(--muted);
+      margin-top: 2px;
+      font-size: .77rem;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .circle-btn {
+      display: grid;
+      place-items: center;
+      width: 39px;
+      height: 39px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .circle-btn.play-btn {
+      width: 48px;
+      height: 48px;
+      background: var(--gold);
+      color: var(--primary-dark);
+      font-size: 1.2rem;
+    }
+
+    .player-progress {
+      flex: 2;
+      min-width: 165px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: .76rem;
+    }
+
+    #progressBar {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 1000;
+      right: 50%;
+      bottom: 145px;
+      transform: translateX(50%) translateY(15px);
+      opacity: 0;
+      pointer-events: none;
+      background: var(--primary-dark);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      max-width: min(90%, 420px);
+      text-align: center;
+      font-size: .9rem;
+      transition: .25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(50%) translateY(0);
+    }
+
+    footer {
+      margin-top: 22px;
+      background: var(--primary-dark);
+      color: #fff;
+      text-align: center;
+      padding: 17px 12px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding-bottom: 165px;
+      }
+
+      .sheikhs-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px;
+      }
+
+      .sheikh-card {
+        min-height: 140px;
+        padding: 10px 5px;
+      }
+
+      .sheikh-name {
+        font-size: .84rem;
+      }
+
+      .country-tag {
+        font-size: .7rem;
+        padding: 4px 6px;
+      }
+
+      .sheikh-label {
+        font-size: .67rem;
+        padding: 4px 10px;
+      }
+
+      .player-progress {
+        order: 3;
+        min-width: 100%;
+      }
+
+      .stats {
+        gap: 8px;
+      }
+
+      .stat {
+        padding: 12px 6px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .sheikhs-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <header class="main-header">
+    <div class="brand-box">
+      <h1>لا باركوه للقرآن الكريم</h1>
+      <p>صدقة جارية لكل من ينشرها</p>
+    </div>
+  </header>
 
-<header>
-<h1>لا باركوه للقرآن الكريم</h1>
-<p>صدقة جارية لكل من ينشرها</p>
-</header>
+  <nav class="main-nav">
+    <button class="nav-btn active" data-section="home">🏠 الرئيسية</button>
+    <button class="nav-btn" data-section="sheikhs">👤 المشايخ</button>
+    <button class="nav-btn" data-section="surahs">📖 السور</button>
+    <button class="nav-btn" data-section="saved">💾 المحفوظة</button>
+    <button class="nav-btn" data-section="settings">⚙️ الإعدادات</button>
+  </nav>
 
-<nav>
-<button class="nav-btn active" data-page="home">🏠 الرئيسية</button>
-<button class="nav-btn" data-page="sheikhs">👤 المشايخ</button>
-<button class="nav-btn" data-page="surahs">📖 السور</button>
-<button class="nav-btn" data-page="saved">💾 المحفوظة</button>
-<button class="nav-btn" data-page="settings">⚙ الإعدادات</button>
-</nav>
+  <main class="content">
 
-<main>
-<section id="home" class="active">
-<div class="card">
-<h2>مرحباً بك في تطبيق لا باركوه</h2>
-<p>اختر شيخًا ثم سورة، واضغط «حفظ» لتتمكن من الاستماع بدون إنترنت.</p>
-</div>
-<div class="card">
-<p>التلاوات المحفوظة: <b id="savedCount">0</b></p>
-</div>
-</section>
+    <section id="home" class="section active">
+      <div class="card welcome-card">
+        <h2>🕌 مرحبًا بك في لا باركوه</h2>
+        <p>اختر شيخًا ثم استمع إلى السور. اضغط على زر «حفظ» لتنزيل التلاوة والاستماع إليها بدون إنترنت.</p>
+      </div>
 
-<section id="sheikhs">
-<h2 class="title">اختر القارئ</h2>
-<input type="text" id="sheikhSearch" placeholder="🔍 ابحث عن شيخ...">
-<div id="sheikhsList" class="grid"></div>
-</section>
+      <div class="stats">
+        <button class="stat" id="goSheikhs">
+          <h3>👤 المشايخ</h3>
+          <p>40</p>
+        </button>
 
-<section id="surahs">
-<h2 class="title">سور القرآن الكريم</h2>
-<input type="text" id="surahSearch" placeholder="🔍 ابحث عن سورة...">
-<div id="surahsList" class="list"></div>
-</section>
+        <button class="stat" id="goSurahs">
+          <h3>📖 السور</h3>
+          <p>114</p>
+        </button>
 
-<section id="saved">
-<h2 class="title">التلاوات المحفوظة</h2>
-<div id="savedList" class="list"></div>
-</section>
+        <button class="stat" id="goSaved">
+          <h3>💾 المحفوظة</h3>
+          <p id="savedCount">0</p>
+        </button>
+      </div>
+    </section>
 
-<section id="settings">
-<h2 class="title">الإعدادات</h2>
-<div class="card">
-<label><input type="checkbox" id="darkMode"> الوضع الليلي</label>
-</div>
-<div class="card">
-<button class="save" id="clearCache" style="background:#c0392b">🗑 مسح جميع التلاوات المحفوظة</button>
-</div>
-</section>
-</main>
+    <section id="sheikhs" class="section">
+      <h2 class="section-title">🌙 مشايخ القرآن الكريم</h2>
+      <input id="sheikhSearch" class="search-input" type="text" placeholder="🔍 ابحث عن شيخ أو دولة..." autocomplete="off">
+      <div id="sheikhsList" class="sheikhs-grid"></div>
+    </section>
 
-<div class="player">
-<div class="info">
-<b id="surahName">اختر سورة للاستماع</b>
-<span id="sheikhName"></span>
-</div>
-<div class="controls">
-<button id="prevBtn">⏮</button>
-<button id="playBtn">▶️</button>
-<button id="nextBtn">⏭</button>
-</div>
-<div class="progress">
-<span id="currentTime">00:00</span>
-<input type="range" id="progress" value="0" min="0" max="100">
-<span id="duration">00:00</span>
-</div>
-</div>
+    <section id="surahs" class="section">
+      <h2 class="section-title">📖 سور القرآن الكريم</h2>
+      <input id="surahSearch" class="search-input" type="text" placeholder="🔍 ابحث عن سورة..." autocomplete="off">
+      <div id="surahsList" class="surahs-list"></div>
+    </section>
 
-<footer>صدقة جارية لكل من ينشرها</footer>
-<div id="toast" class="toast"></div>
+    <section id="saved" class="section">
+      <h2 class="section-title">💾 التلاوات المحفوظة</h2>
+      <div id="savedList" class="surahs-list"></div>
+    </section>
 
-<script>
-const SHEIKHS=[
-{name:"مشاري راشد العفاسي",country:"الكويت 🇰🇼",server:"https://server8.mp3quran.net/afs/"},
-{name:"عبد الرحمن السديس",country:"السعودية 🇸🇦",server:"https://server11.mp3quran.net/sds/"},
-{name:"ماهر المعيقلي",country:"السعودية 🇸🇦",server:"https://server12.mp3quran.net/maher/"},
-{name:"ياسر الدوسري",country:"السعودية 🇸🇦",server:"https://server11.mp3quran.net/yasser/"},
-{name:"عبد الباسط عبد الصمد",country:"مصر 🇪🇬",server:"https://server7.mp3quran.net/basit/"},
-{name:"محمود خليل الحصري",country:"مصر 🇪🇬",server:"https://server13.mp3quran.net/husr/"},
-{name:"محمد صديق المنشاوي",country:"مصر 🇪🇬",server:"https://server10.mp3quran.net/minsh/"},
-{name:"إدريس أبكر",country:"السودان 🇸🇩",server:"https://server6.mp3quran.net/abkr/"},
-{name:"ناصر القطامي",country:"السعودية 🇸🇦",server:"https://server6.mp3quran.net/qtm/"},
-{name:"سعد الغامدي",country:"السعودية 🇸🇦",server:"https://server7.mp3quran.net/s_gmd/"}
-];
+    <section id="settings" class="section">
+      <h2 class="section-title">⚙️ الإعدادات</h2>
 
-const SURAHS=["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+      <div class="card">
+        <div class="settings-row">
+          <div>
+            <strong>الوضع الليلي</strong>
+            <p style="color:var(--muted);font-size:.82rem;margin-top:4px">تغيير ألوان التطبيق إلى نمط مريح للعين.</p>
+          </div>
 
-let selectedSheikh=JSON.parse(localStorage.getItem("selectedSheikh")||"null");
-let saved=JSON.parse(localStorage.getItem("savedRecitations")||"[]");
-let currentSurah=1;
-const audio=new Audio();
-audio.preload="metadata";
+          <label class="switch" aria-label="الوضع الليلي">
+            <input id="darkMode" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
 
-const $=id=>document.getElementById(id);
-const pad=n=>String(n).padStart(3,"0");
-const url=(server,n)=>server+pad(n)+".mp3";
+        <div class="settings-row">
+          <div>
+            <strong>حذف التلاوات المحفوظة</strong>
+            <p style="color:var(--muted);font-size:.82rem;margin-top:4px">سيتم حذف جميع الملفات الصوتية المخزنة على هذا الجهاز.</p>
+          </div>
 
-function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
+          <button id="clearSavedBtn" class="btn btn-delete">🗑 مسح الكل</button>
+        </div>
+      </div>
+    </section>
 
-function showPage(page){
-document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-$(page).classList.add("active");
-}
+  </main>
 
-document.querySelectorAll(".nav-btn").forEach(btn=>btn.onclick=()=>showPage(btn.dataset.page));
+  <footer>صدقة جارية لكل من ينشرها</footer>
 
-function renderSheikhs(filter=""){
-$("sheikhsList").innerHTML=SHEIKHS.filter(s=>s.name.includes(filter)).map((s,i)=>`
-<div class="item ${selectedSheikh&&selectedSheikh.server===s.server?"selected":""}" data-i="${i}">
-<b>${s.name}</b><br><small>${s.country}</small>
-</div>`).join("");
-document.querySelectorAll("#sheikhsList .item").forEach(el=>el.onclick=()=>{
-selectedSheikh=SHEIKHS[el.dataset.i];
-localStorage.setItem("selectedSheikh",JSON.stringify(selectedSheikh));
-renderSheikhs($("sheikhSearch").value);
-renderSurahs($("surahSearch").value);
-toast("تم اختيار: "+selectedSheikh.name);
-showPage("surahs");
-});
-}
+  <div class="player-bar">
+    <div class="player-info">
+      <span id="currentSurah">اختر سورة للاستماع</span>
+      <span id="currentSheikh">لم يتم اختيار شيخ بعد</span>
+    </div>
 
-function renderSurahs(filter=""){
-$("surahsList").innerHTML=SURAHS.map((name,i)=>{
-const n=i+1;
-const isSaved=saved.some(x=>x.surah===n&&x.server===(selectedSheikh?selectedSheikh.server:""));
-return `<div class="row">
-<div style="display:flex;gap:10px;align-items:center;cursor:pointer" data-play="${n}">
-<b>${n}. ${name}</b>
-</div>
-<button class="save ${isSaved?"saved":""}" data-save="${n}">${isSaved?"✓ محفوظة":"⬇ حفظ"}</button>
-</div>`;
-}).join("");
+    <div class="player-controls">
+      <button id="previousBtn" class="circle-btn" aria-label="السورة السابقة">⏮</button>
+      <button id="playBtn" class="circle-btn play-btn" aria-label="تشغيل أو إيقاف">▶</button>
+      <button id="nextBtn" class="circle-btn" aria-label="السورة التالية">⏭</button>
+      <button id="stopBtn" class="circle-btn" aria-label="إيقاف">⏹</button>
+    </div>
 
-document.querySelectorAll("[data-play]").forEach(el=>el.onclick=()=>playSurah(+el.dataset.play));
-document.querySelectorAll("[data-save]").forEach(btn=>btn.onclick=()=>saveSurah(+btn.dataset.save,btn));
-}
+    <div class="player-progress">
+      <span id="currentTime">00:00</span>
+      <input id="progressBar" type="range" min="0" max="100" value="0" aria-label="تقدم التلاوة">
+      <span id="duration">00:00</span>
+    </div>
+  </div>
 
-async function saveSurah(n,btn){
-if(!selectedSheikh){toast("اختر الشيخ أولًا");showPage("sheikhs");return}
-const fileUrl=url(selectedSheikh.server,n);
-btn.classList.add("loading");btn.textContent="جاري الحفظ...";
-try{
-const cache=await caches.open("labarkouh-quran-audio");
-await cache.add(fileUrl);
-if(!saved.some(x=>x.surah===n&&x.server===selectedSheikh.server)){
-saved.push({surah:n,name:SURAHS[n-1],sheikh:selectedSheikh.name,server:selectedSheikh.server});
-localStorage.setItem("savedRecitations",JSON.stringify(saved));
-}
-btn.classList.remove("loading");btn.classList.add("saved");btn.textContent="✓ محفوظة";
-updateSaved();toast("تم حفظ سورة "+SURAHS[n-1]);
-}catch(e){
-btn.classList.remove("loading");btn.textContent="⬇ حفظ";
-toast("تعذر حفظ التلاوة، تحقق من الإنترنت");
-}
-}
+  <div id="toast" class="toast"></div>
 
-function updateSaved(){
-$("savedCount").textContent=saved.length;
-$("savedList").innerHTML=saved.length?saved.map((x,i)=>`
-<div class="row">
-<div><b>${x.surah}. ${x.name}</b><br><small>${x.sheikh}</small></div>
-<button class="save" data-play-saved="${i}">▶ تشغيل</button>
-</div>`).join(""):"<div class='card'>لا توجد تلاوات محفوظة بعد.</div>";
-document.querySelectorAll("[data-play-saved]").forEach(b=>b.onclick=()=>{
-const x=saved[+b.dataset.playSaved];
-selectedSheikh={name:x.sheikh,server:x.server};
-playSurah(x.surah);
-});
-}
+  <script>
+    "use strict";
 
-function playSurah(n){
-if(!selectedSheikh){toast("اختر الشيخ أولًا");showPage("sheikhs");return}
-currentSurah=n;
-$("surahName").textContent=n+". "+SURAHS[n-1];
-$("sheikhName").textContent=selectedSheikh.name;
-audio.src=url(selectedSheikh.server,n);
-audio.play().then(()=>{$("playBtn").textContent="⏸"}).catch(()=>toast("تعذر تشغيل التلاوة"));
-}
+    /*
+      تضم القائمة 40 شيخًا بالضبط.
+      لا توجد كلمة أو علامة "شاب" في الواجهة أو البيانات.
+    */
+    const SHEIKHS = [
+      { name: "مشاري راشد العفاسي", country: "الكويت 🇰🇼", server: "https://server8.mp3quran.net/afs/" },
+      { name: "عبد الرحمن السديس", country: "السعودية 🇸🇦", server: "https://server11.mp3quran.net/sds/" },
+      { name: "سعود الشريم", country: "السعودية 🇸🇦", server: "https://server7.mp3quran.net/shur/" },
+      { name: "ماهر المعيقلي", country: "السعودية 🇸🇦", server: "https://server12.mp3quran.net/maher/" },
+      { name: "ياسر الدوسري", country: "السعودية 🇸🇦", server: "https://server11.mp3quran.net/yasser/" },
+      { name: "علي الحذيفي", country: "السعودية 🇸🇦", server: "https://server9.mp3quran.net/hthfi/" },
+      { name: "محمد أيوب", country: "السعودية 🇸🇦", server: "https://server8.mp3quran.net/ayyub/" },
+      { name: "أبو بكر الشاطري", country: "السعودية 🇸🇦", server: "https://server11.mp3quran.net/shatri/" },
+      { name: "أحمد بن علي العجمي", country: "السعودية 🇸🇦", server: "https://server10.mp3quran.net/ajm/128/" },
+      { name: "هانئ الرفاعي", country: "السعودية 🇸🇦", server: "https://server8.mp3quran.net/hani/" },
 
-$("playBtn").onclick=()=>{
-if(!audio.src){playSurah(currentSurah);return}
-audio.paused?audio.play():audio.pause();
-$("playBtn").textContent=audio.paused?"▶️":"⏸";
-};
-$("nextBtn").onclick=()=>playSurah(currentSurah>=114?1:currentSurah+1);
-$("prevBtn").onclick=()=>playSurah(currentSurah<=1?114:currentSurah-1);
+      { name: "عبد الله عواد الجهني", country: "السعودية 🇸🇦", server: "https://server13.mp3quran.net/jhn/" },
+      { name: "خالد الجليل", country: "السعودية 🇸🇦", server: "https://server10.mp3quran.net/jleel/" },
+      { name: "بدر التركي", country: "السعودية 🇸🇦", server: "https://server10.mp3quran.net/bader/Rewayat-Hafs-A-n-Assem/" },
+      { name: "بندر بليلة", country: "السعودية 🇸🇦", server: "https://server6.mp3quran.net/balilah/" },
+      { name: "عبد البارئ الثبيتي", country: "السعودية 🇸🇦", server: "https://server6.mp3quran.net/thubti/" },
+      { name: "خليفة الطنيجي", country: "الإمارات 🇦🇪", server: "https://server12.mp3quran.net/tnjy/" },
+      { name: "صلاح بو خاطر", country: "الإمارات 🇦🇪", server: "https://server8.mp3quran.net/bu_khtr/" },
+      { name: "فارس عباد", country: "اليمن 🇾🇪", server: "https://server8.mp3quran.net/frs_a/" },
+      { name: "عبد الباسط عبد الصمد", country: "مصر 🇪🇬", server: "https://server7.mp3quran.net/basit/" },
+      { name: "محمود خليل الحصري", country: "مصر 🇪🇬", server: "https://server13.mp3quran.net/husr/" },
 
-audio.ontimeupdate=()=>{
-if(audio.duration){
-$("progress").value=audio.currentTime/audio.duration*100;
-$("currentTime").textContent=fmt(audio.currentTime);
-$("duration").textContent=fmt(audio.duration);
-}
-};
-$("progress").oninput=e=>{if(audio.duration)audio.currentTime=e.target.value/100*audio.duration};
-audio.onended=()=>playSurah(currentSurah>=114?1:currentSurah+1);
+      { name: "محمد صديق المنشاوي", country: "مصر 🇪🇬", server: "https://server10.mp3quran.net/minsh/" },
+      { name: "محمد جبريل", country: "مصر 🇪🇬", server: "https://server8.mp3quran.net/jbrl/" },
+      { name: "نورين محمد صديق", country: "السودان 🇸🇩", server: "https://server16.mp3quran.net/nourin_siddig/Rewayat-Aldori-A-n-Abi-Amr/" },
+      { name: "إدريس أبكر", country: "السودان 🇸🇩", server: "https://server6.mp3quran.net/abkr/" },
+      { name: "عكاشة كميني", country: "السودان 🇸🇩", server: "https://server16.mp3quran.net/okasha/Rewayat-Albizi-A-n-Ibn-Katheer/" },
+      { name: "الدوكالي محمد العالم", country: "ليبيا 🇱🇾", server: "https://server7.mp3quran.net/dokali/" },
+      { name: "عبد الرشيد صوفي", country: "الصومال 🇸🇴", server: "https://server16.mp3quran.net/soufi/Rewayat-Hafs-A-n-Assem/" },
+      { name: "موسى بلال", country: "أفريقيا 🌍", server: "https://server11.mp3quran.net/bilal/" },
+      { name: "محمد عثمان خان", country: "الهند 🇮🇳", server: "https://server6.mp3quran.net/khan/" },
+      { name: "جمال شاكر عبدالله", country: "العراق 🇮🇶", server: "https://server6.mp3quran.net/jamal/" },
 
-function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+      { name: "ناصر القطامي", country: "السعودية 🇸🇦", server: "https://server6.mp3quran.net/qtm/" },
+      { name: "سعد الغامدي", country: "السعودية 🇸🇦", server: "https://server7.mp3quran.net/s_gmd/" },
+      { name: "منصور السالمي", country: "السعودية 🇸🇦", server: "https://server14.mp3quran.net/mansor/" },
+      { name: "أحمد النفيس", country: "الكويت 🇰🇼", server: "https://server16.mp3quran.net/nufais/Rewayat-Hafs-A-n-Assem/" },
+      { name: "مصطفى رعد العزاوي", country: "العراق 🇮🇶", server: "https://server8.mp3quran.net/ra3ad/" },
+      { name: "هيثم الدخين", country: "السعودية 🇸🇦", server: "https://server16.mp3quran.net/h_dukhain/Rewayat-Hafs-A-n-Assem/" },
+      { name: "عمر القزابري", country: "المغرب 🇲🇦", server: "https://server9.mp3quran.net/omar_warsh/" },
+      { name: "عبدالله الموسى", country: "السعودية 🇸🇦", server: "https://server14.mp3quran.net/mousa/Rewayat-Hafs-A-n-Assem/" },
+      { name: "رعد محمد الكردي", country: "العراق 🇮🇶", server: "https://server6.mp3quran.net/kurdi/" },
+      { name: "إسلام صبحي", country: "مصر 🇪🇬", server: "https://server14.mp3quran.net/islam/" }
+    ];
 
-$("sheikhSearch").oninput=e=>renderSheikhs(e.target.value);
-$("surahSearch").oninput=e=>renderSurahs(e.target.value);
-$("darkMode").onchange=e=>{document.body.classList.toggle("dark",e.target.checked);localStorage.setItem("dark",e.target.checked)};
-$("clearCache").onclick=async()=>{
-await caches.delete("labarkouh-quran-audio");
-saved=[];localStorage.setItem("savedRecitations","[]");
-updateSaved();renderSurahs($("surahSearch").value);toast("تم مسح التلاوات المحفوظة");
-};
+    const SURAHS = [
+      "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال",
+      "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف",
+      "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص",
+      "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص",
+      "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح",
+      "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة",
+      "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك",
+      "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات",
+      "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق",
+      "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق",
+      "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل",
+      "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"
+    ];
 
-if(localStorage.getItem("dark")==="true"){$("darkMode").checked=true;document.body.classList.add("dark")}
-renderSheikhs();renderSurahs();updateSaved();
+    const APP_CACHE = "labarkouh-quran-audio-v1";
+    const audio = new Audio();
+    audio.preload = "metadata";
 
-if("serviceWorker" in navigator){
-window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
-}
-</script>
-</body>
-</html>
+    let selectedSheikh = safeRead("labarkouh-selected-sheikh", null);
+    let savedRecitations = safeRead("labarkouh-saved-recitations", []);
+    let currentSurahId = 1;
+    let toastTimer = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    function safeRead(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function safeWrite(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function padSurahNumber(number) {
+      return String(number).padStart(3, "0");
+    }
+
+    function getAudioUrl(sheikh, surahId) {
+      return `${sheikh.server}${padSurahNumber(surahId)}.mp3`;
+    }
+
+    function showToast(message, duration = 2600) {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, duration);
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll(".section").forEach((section) => {
+        section.classList.toggle("active", section.id === sectionId);
+      });
+
+      document.querySelectorAll(".nav-btn").forEach((button) => {
+        button.classList.toggle("active", button.dataset.section === sectionId);
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = String(value);
+      return div.innerHTML;
+    }
+
+    function isSaved(sheikh, surahId) {
+      return savedRecitations.some((item) =>
+        item.server === sheikh.server && item.surahId === surahId
+      );
+    }
+
+    function renderSheikhs(search = "") {
+      const keyword = search.trim().toLowerCase();
+
+      const visibleSheikhs = SHEIKHS.filter((sheikh) => {
+        return (
+          sheikh.name.toLowerCase().includes(keyword) ||
+          sheikh.country.toLowerCase().includes(keyword)
+        );
+      });
+
+      const container = $("sheikhsList");
+
+      if (!visibleSheikhs.length) {
+        container.innerHTML = `<div class="card empty" style="grid-column:1/-1">لم يتم العثور على شيخ مطابق للبحث.</div>`;
+        return;
+      }
+
+      container.innerHTML = visibleSheikhs.map((sheikh) => {
+        const index = SHEIKHS.findIndex((item) => item.server === sheikh.server);
+        const selected = selectedSheikh && selectedSheikh.server === sheikh.server;
+
+        return `
+          <button class="sheikh-card ${selected ? "selected" : ""}" data-sheikh-index="${index}">
+            <span class="sheikh-label">الشيخ</span>
+            <strong class="sheikh-name">${escapeHtml(sheikh.name)}</strong>
+            <span class="country-tag">${escapeHtml(sheikh.country)}</span>
+          </button>
+        `;
+      }).join("");
+
+      container.querySelectorAll("[data-sheikh-index]").forEach((card) => {
+        card.addEventListener("click", () => {
+          const index = Number(card.dataset.sheikhIndex);
+          selectedSheikh = SHEIKHS[index];
+
+          safeWrite("labarkouh-selected-sheikh", selectedSheikh);
+
+          renderSheikhs($("sheikhSearch").value);
+          renderSurahs($("surahSearch").value);
+
+          $("currentSheikh").textContent = `القارئ: ${selectedSheikh.name}`;
+          showToast(`تم اختيار الشيخ: ${selectedSheikh.name}`);
+        });
+      });
+    }
+
+    function renderSurahs(search = "") {
+      const keyword = search.trim().toLowerCase();
+
+      const visibleSurahs = SURAHS
+        .map((name, index) => ({ id: index + 1, name }))
+        .filter((surah) => {
+          return (
+            surah.name.toLowerCase().includes(keyword) ||
+            String(surah.id).includes(keyword)
+          );
+        });
+
+      const container = $("surahsList");
+
+      if (!visibleSurahs.length) {
+        container.innerHTML = `<div class="card empty">لم يتم العثور على سورة مطابقة للبحث.</div>`;
+        return;
+      }
+
+      container.innerHTML = visibleSurahs.map((surah) => {
+        const saved = selectedSheikh ? isSaved(selectedSheikh, surah.id) : false;
+
+        return `
+          <article class="surah-item">
+            <div class="surah-main" data-play-surah="${surah.id}">
+              <span class="surah-number">${surah.id}</span>
+              <div>
+                <strong>${escapeHtml(surah.name)}</strong>
+                <small>${selectedSheikh ? selectedSheikh.name : "اختر شيخًا أولًا"}</small>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-play" data-play-surah="${surah.id}">▶ تشغيل</button>
+              <button
+                c
