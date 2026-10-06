@@ -1,16 +1,18 @@
 {
   "name": "لا باركوه للقرآن الكريم",
   "short_name": "لا باركوه",
-  "description": "استمع واحفظ تلاوات القرآن الكريم للعمل بدون إنترنت",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#f5f0e1",
-  "theme_color": "#1a5e3a",
+  "description": "استمع إلى القرآن الكريم واحفظه، بعد التحميل يعمل بدون إنترنت",
   "lang": "ar",
   "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f8f3e5",
+  "theme_color": "#115c3b",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a5e3a'/><path d='M25 30 C35 25,45 30,50 35 C55 30,65 25,75 30 L75 70 C65 65,55 70,50 75 C45 70,35 65,25 70 Z' fill='white' stroke='%23d4af37' stroke-width='3'/></svg>",
+      "src": "icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
