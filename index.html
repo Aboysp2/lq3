@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a5e3a">
+<meta name="description" content="تطبيق لا باركوه للاستماع وحفظ تلاوات القرآن الكريم للعمل بدون إنترنت">
+<link rel="manifest" href="manifest.json">
+<title>لا باركوه للقرآن الكريم</title>
+
+<style>
+:root{--primary:#1a5e3a;--primary-dark:#0d3d22;--secondary:#d4af37;--bg:#f5f0e1;--text:#222;--card:#fff;--radius:14px;--shadow:0 4px 14px rgba(0,0,0,.12)}
+body.dark{--bg:#121826;--text:#eee;--card:#1b2437;--shadow:0 4px 14px rgba(0,0,0,.5)}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,"Segoe UI",Tahoma,sans-serif}
+body{background:var(--bg);color:var(--text);padding-bottom:150px;transition:.3s}
+header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;text-align:center;padding:22px 14px;border-bottom:4px solid var(--secondary)}
+header h1{font-size:1.6em}
+header p{color:var(--secondary);margin-top:5px}
+nav{position:sticky;top:0;z-index:50;display:flex;justify-content:center;gap:7px;padding:10px;background:var(--card);box-shadow:var(--shadow);flex-wrap:wrap}
+.nav-btn{border:1.5px solid var(--primary);background:transparent;color:var(--primary);padding:7px 13px;border-radius:20px;font-weight:700;cursor:pointer}
+.nav-btn.active{background:var(--primary);color:#fff}
+main{max-width:900px;margin:18px auto;padding:0 14px}
+section{display:none}
+section.active{display:block}
+h2.title{color:var(--primary);border-bottom:2px solid var(--secondary);padding-bottom:6px;margin-bottom:14px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+input[type=text],select{width:100%;padding:11px;border:1px solid #bbb;border-radius:12px;background:var(--card);color:var(--text);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;text-align:center;cursor:pointer;border:2px solid transparent}
+.item:hover,.item.selected{border-color:var(--secondary)}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+button.save{background:var(--primary);color:#fff;border:0;padding:8px 13px;border-radius:18px;font-weight:700;cursor:pointer}
+button.save.saved{background:#27ae60}
+button.save.loading{background:#e67e22}
+.player{position:fixed;bottom:0;left:0;right:0;background:var(--card);padding:12px;box-shadow:0 -4px 16px rgba(0,0,0,.25);border-top:3px solid var(--secondary);z-index:100;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.player .info{flex:1;min-width:140px}
+.player .info b{color:var(--primary);display:block}
+.player .info span{font-size:.8em;opacity:.7}
+.controls{display:flex;gap:6px}
+.controls button{width:40px;height:40px;border:0;border-radius:50%;background:var(--primary);color:#fff;font-size:1em;cursor:pointer}
+#playBtn{width:48px;height:48px;background:var(--secondary);color:var(--primary-dark);font-size:1.2em}
+.progress{flex:2;min-width:170px;display:flex;align-items:center;gap:8px;font-size:.78em}
+input[type=range]{flex:1;accent-color:var(--primary)}
+.toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);background:var(--primary-dark);color:#fff;padding:10px 18px;border-radius:25px;opacity:0;pointer-events:none;transition:.3s;z-index:999}
+.toast.show{opacity:1}
+footer{background:var(--primary-dark);color:#fff;text-align:center;padding:16px;font-weight:800}
+@media(max-width:600px){.progress{order:3;min-width:100%}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>لا باركوه للقرآن الكريم</h1>
+<p>صدقة جارية لكل من ينشرها</p>
+</header>
+
+<nav>
+<button class="nav-btn active" data-page="home">🏠 الرئيسية</button>
+<button class="nav-btn" data-page="sheikhs">👤 المشايخ</button>
+<button class="nav-btn" data-page="surahs">📖 السور</button>
+<button class="nav-btn" data-page="saved">💾 المحفوظة</button>
+<button class="nav-btn" data-page="settings">⚙ الإعدادات</button>
+</nav>
+
+<main>
+<section id="home" class="active">
+<div class="card">
+<h2>مرحباً بك في تطبيق لا باركوه</h2>
+<p>اختر شيخًا ثم سورة، واضغط «حفظ» لتتمكن من الاستماع بدون إنترنت.</p>
+</div>
+<div class="card">
+<p>التلاوات المحفوظة: <b id="savedCount">0</b></p>
+</div>
+</section>
+
+<section id="sheikhs">
+<h2 class="title">اختر القارئ</h2>
+<input type="text" id="sheikhSearch" placeholder="🔍 ابحث عن شيخ...">
+<div id="sheikhsList" class="grid"></div>
+</section>
+
+<section id="surahs">
+<h2 class="title">سور القرآن الكريم</h2>
+<input type="text" id="surahSearch" placeholder="🔍 ابحث عن سورة...">
+<div id="surahsList" class="list"></div>
+</section>
+
+<section id="saved">
+<h2 class="title">التلاوات المحفوظة</h2>
+<div id="savedList" class="list"></div>
+</section>
+
+<section id="settings">
+<h2 class="title">الإعدادات</h2>
+<div class="card">
+<label><input type="checkbox" id="darkMode"> الوضع الليلي</label>
+</div>
+<div class="card">
+<button class="save" id="clearCache" style="background:#c0392b">🗑 مسح جميع التلاوات المحفوظة</button>
+</div>
+</section>
+</main>
+
+<div class="player">
+<div class="info">
+<b id="surahName">اختر سورة للاستماع</b>
+<span id="sheikhName"></span>
+</div>
+<div class="controls">
+<button id="prevBtn">⏮</button>
+<button id="playBtn">▶️</button>
+<button id="nextBtn">⏭</button>
+</div>
+<div class="progress">
+<span id="currentTime">00:00</span>
+<input type="range" id="progress" value="0" min="0" max="100">
+<span id="duration">00:00</span>
+</div>
+</div>
+
+<footer>صدقة جارية لكل من ينشرها</footer>
+<div id="toast" class="toast"></div>
+
+<script>
+const SHEIKHS=[
+{name:"مشاري راشد العفاسي",country:"الكويت 🇰🇼",server:"https://server8.mp3quran.net/afs/"},
+{name:"عبد الرحمن السديس",country:"السعودية 🇸🇦",server:"https://server11.mp3quran.net/sds/"},
+{name:"ماهر المعيقلي",country:"السعودية 🇸🇦",server:"https://server12.mp3quran.net/maher/"},
+{name:"ياسر الدوسري",country:"السعودية 🇸🇦",server:"https://server11.mp3quran.net/yasser/"},
+{name:"عبد الباسط عبد الصمد",country:"مصر 🇪🇬",server:"https://server7.mp3quran.net/basit/"},
+{name:"محمود خليل الحصري",country:"مصر 🇪🇬",server:"https://server13.mp3quran.net/husr/"},
+{name:"محمد صديق المنشاوي",country:"مصر 🇪🇬",server:"https://server10.mp3quran.net/minsh/"},
+{name:"إدريس أبكر",country:"السودان 🇸🇩",server:"https://server6.mp3quran.net/abkr/"},
+{name:"ناصر القطامي",country:"السعودية 🇸🇦",server:"https://server6.mp3quran.net/qtm/"},
+{name:"سعد الغامدي",country:"السعودية 🇸🇦",server:"https://server7.mp3quran.net/s_gmd/"}
+];
+
+const SURAHS=["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+
+let selectedSheikh=JSON.parse(localStorage.getItem("selectedSheikh")||"null");
+let saved=JSON.parse(localStorage.getItem("savedRecitations")||"[]");
+let currentSurah=1;
+const audio=new Audio();
+audio.preload="metadata";
+
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(3,"0");
+const url=(server,n)=>server+pad(n)+".mp3";
+
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
+
+function showPage(page){
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+$(page).classList.add("active");
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn=>btn.onclick=()=>showPage(btn.dataset.page));
+
+function renderSheikhs(filter=""){
+$("sheikhsList").innerHTML=SHEIKHS.filter(s=>s.name.includes(filter)).map((s,i)=>`
+<div class="item ${selectedSheikh&&selectedSheikh.server===s.server?"selected":""}" data-i="${i}">
+<b>${s.name}</b><br><small>${s.country}</small>
+</div>`).join("");
+document.querySelectorAll("#sheikhsList .item").forEach(el=>el.onclick=()=>{
+selectedSheikh=SHEIKHS[el.dataset.i];
+localStorage.setItem("selectedSheikh",JSON.stringify(selectedSheikh));
+renderSheikhs($("sheikhSearch").value);
+renderSurahs($("surahSearch").value);
+toast("تم اختيار: "+selectedSheikh.name);
+showPage("surahs");
+});
+}
+
+function renderSurahs(filter=""){
+$("surahsList").innerHTML=SURAHS.map((name,i)=>{
+const n=i+1;
+const isSaved=saved.some(x=>x.surah===n&&x.server===(selectedSheikh?selectedSheikh.server:""));
+return `<div class="row">
+<div style="display:flex;gap:10px;align-items:center;cursor:pointer" data-play="${n}">
+<b>${n}. ${name}</b>
+</div>
+<button class="save ${isSaved?"saved":""}" data-save="${n}">${isSaved?"✓ محفوظة":"⬇ حفظ"}</button>
+</div>`;
+}).join("");
+
+document.querySelectorAll("[data-play]").forEach(el=>el.onclick=()=>playSurah(+el.dataset.play));
+document.querySelectorAll("[data-save]").forEach(btn=>btn.onclick=()=>saveSurah(+btn.dataset.save,btn));
+}
+
+async function saveSurah(n,btn){
+if(!selectedSheikh){toast("اختر الشيخ أولًا");showPage("sheikhs");return}
+const fileUrl=url(selectedSheikh.server,n);
+btn.classList.add("loading");btn.textContent="جاري الحفظ...";
+try{
+const cache=await caches.open("labarkouh-quran-audio");
+await cache.add(fileUrl);
+if(!saved.some(x=>x.surah===n&&x.server===selectedSheikh.server)){
+saved.push({surah:n,name:SURAHS[n-1],sheikh:selectedSheikh.name,server:selectedSheikh.server});
+localStorage.setItem("savedRecitations",JSON.stringify(saved));
+}
+btn.classList.remove("loading");btn.classList.add("saved");btn.textContent="✓ محفوظة";
+updateSaved();toast("تم حفظ سورة "+SURAHS[n-1]);
+}catch(e){
+btn.classList.remove("loading");btn.textContent="⬇ حفظ";
+toast("تعذر حفظ التلاوة، تحقق من الإنترنت");
+}
+}
+
+function updateSaved(){
+$("savedCount").textContent=saved.length;
+$("savedList").innerHTML=saved.length?saved.map((x,i)=>`
+<div class="row">
+<div><b>${x.surah}. ${x.name}</b><br><small>${x.sheikh}</small></div>
+<button class="save" data-play-saved="${i}">▶ تشغيل</button>
+</div>`).join(""):"<div class='card'>لا توجد تلاوات محفوظة بعد.</div>";
+document.querySelectorAll("[data-play-saved]").forEach(b=>b.onclick=()=>{
+const x=saved[+b.dataset.playSaved];
+selectedSheikh={name:x.sheikh,server:x.server};
+playSurah(x.surah);
+});
+}
+
+function playSurah(n){
+if(!selectedSheikh){toast("اختر الشيخ أولًا");showPage("sheikhs");return}
+currentSurah=n;
+$("surahName").textContent=n+". "+SURAHS[n-1];
+$("sheikhName").textContent=selectedSheikh.name;
+audio.src=url(selectedSheikh.server,n);
+audio.play().then(()=>{$("playBtn").textContent="⏸"}).catch(()=>toast("تعذر تشغيل التلاوة"));
+}
+
+$("playBtn").onclick=()=>{
+if(!audio.src){playSurah(currentSurah);return}
+audio.paused?audio.play():audio.pause();
+$("playBtn").textContent=audio.paused?"▶️":"⏸";
+};
+$("nextBtn").onclick=()=>playSurah(currentSurah>=114?1:currentSurah+1);
+$("prevBtn").onclick=()=>playSurah(currentSurah<=1?114:currentSurah-1);
+
+audio.ontimeupdate=()=>{
+if(audio.duration){
+$("progress").value=audio.currentTime/audio.duration*100;
+$("currentTime").textContent=fmt(audio.currentTime);
+$("duration").textContent=fmt(audio.duration);
+}
+};
+$("progress").oninput=e=>{if(audio.duration)audio.currentTime=e.target.value/100*audio.duration};
+audio.onended=()=>playSurah(currentSurah>=114?1:currentSurah+1);
+
+function fmt(t){const m=Math.floor(t/60),s=Math.floor(t%60);return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+
+$("sheikhSearch").oninput=e=>renderSheikhs(e.target.value);
+$("surahSearch").oninput=e=>renderSurahs(e.target.value);
+$("darkMode").onchange=e=>{document.body.classList.toggle("dark",e.target.checked);localStorage.setItem("dark",e.target.checked)};
+$("clearCache").onclick=async()=>{
+await caches.delete("labarkouh-quran-audio");
+saved=[];localStorage.setItem("savedRecitations","[]");
+updateSaved();renderSurahs($("surahSearch").value);toast("تم مسح التلاوات المحفوظة");
+};
+
+if(localStorage.getItem("dark")==="true"){$("darkMode").checked=true;document.body.classList.add("dark")}
+renderSheikhs();renderSurahs();updateSaved();
+
+if("serviceWorker" in navigator){
+window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+}
+</script>
+</body>
+</html>
